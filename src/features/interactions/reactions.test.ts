@@ -12,6 +12,10 @@ describe('getReactionText', () => {
     ['HUG', 'reaction.hug.default'],
     ['HUNGRY', 'reaction.hungry.default'],
     ['MISS_YOU', 'reaction.missYou.default'],
+    ['CHEEK_POKE', 'reaction.cheekPoke.default'],
+    ['KISS', 'reaction.kiss.default'],
+    ['SLEEPY', 'reaction.sleepy.default'],
+    ['VOICE', 'reaction.voice.default'],
   ] as const)('maps %s to %s', (action, key) => {
     expect(getReactionText(action, returnKey)).toBe(key);
   });

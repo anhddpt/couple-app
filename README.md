@@ -6,7 +6,7 @@ Thay vì chỉ nhắn những câu như "em đói", "anh nhớ em" hoặc "em mu
 
 ## Trạng thái dự án
 
-Phase 1 và Phase 2 Core đã có source code Android-first. Source hiện gồm email OTP, avatar layer editor, pairing preview/confirmation, chín resolved action, realtime/latest-action playback, interaction history, quiet hours và durable notification outbox. Việc chạy end-to-end cần một Supabase project hoặc Docker để chạy Supabase local.
+Phase 1, Phase 2 Core và Phase 3 đã có source code Android-first. Source hiện gồm email OTP, avatar layer editor, pairing, interaction realtime/push, history, quiet hours, shared room/pet, matching outfit, voice action và AI postcard. Việc chạy end-to-end cần một Supabase project hoặc Docker để chạy Supabase local.
 
 ## Phạm vi MVP
 
@@ -43,6 +43,7 @@ Việc lựa chọn công nghệ được mô tả chi tiết trong [kiến trú
 - [Roadmap triển khai](docs/implementation-roadmap.md)
 - [Hướng dẫn phát triển](docs/development.md)
 - [Phase 2 Core](docs/phase2-core.md)
+- [Phase 3](docs/phase3.md)
 
 ## Chạy dự án
 

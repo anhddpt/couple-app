@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
+import { outfitCatalog } from '@/features/space/catalog';
 import { colors, radius, spacing } from '@/theme';
-import type { AvatarConfig, AvatarPreset, Mood } from '@/types/domain';
+import type { AvatarConfig, AvatarPreset, CoupleOutfit, Mood } from '@/types/domain';
 
 import { avatarCatalog, normalizeAvatarConfig } from './catalog';
 import { avatarPresets, defaultAvatarConfigs } from './presets';
@@ -24,6 +25,7 @@ type Props = {
   onEyesPress?: () => void;
   onMouthPress?: () => void;
   onHeartPress?: () => void;
+  coupleOutfit?: CoupleOutfit;
   testID?: string;
 };
 
@@ -39,6 +41,7 @@ export function ChibiAvatar({
   onEyesPress,
   onMouthPress,
   onHeartPress,
+  coupleOutfit,
   testID,
 }: Props) {
   const preset = avatarPresets[presetId];
@@ -118,6 +121,11 @@ export function ChibiAvatar({
           { width: size * 0.66, height: size * 0.48, backgroundColor: outfit.color ?? preset.outfit },
         ]}
       />
+      {coupleOutfit ? (
+        <AppText style={[styles.outfitBadge, { color: outfitCatalog[coupleOutfit].color }]}>
+          {outfitCatalog[coupleOutfit].symbol}
+        </AppText>
+      ) : null}
       {onHeartPress ? (
         <Pressable
           accessibilityRole="button"
@@ -162,6 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  outfitBadge: { position: 'absolute', top: '62%', zIndex: 3, fontSize: 18 },
   body: {
     marginTop: -spacing[4],
     borderTopLeftRadius: radius.large,

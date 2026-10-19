@@ -14,13 +14,15 @@
     "test:watch": "jest --watch",
     "smoke:local": "node scripts/smoke-local.mjs",
     "smoke:otp:local": "node scripts/smoke-otp-local.mjs",
-    "check:functions": "npx --yes deno check supabase/functions/notification-worker/index.ts supabase/functions/account-deletion-worker/index.ts supabase/functions/cleanup-ended-couples/index.ts supabase/functions/delete-account/index.ts",
+    "check:functions": "npx --yes deno check supabase/functions/notification-worker/index.ts supabase/functions/account-deletion-worker/index.ts supabase/functions/cleanup-ended-couples/index.ts supabase/functions/delete-account/index.ts supabase/functions/generate-postcard/index.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run check:functions"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.109.0",
     "expo": "~55.0.31",
+    "expo-asset": "~55.0.20",
+    "expo-audio": "~55.0.18",
     "expo-constants": "~55.0.17",
     "expo-crypto": "~55.0.19",
     "expo-device": "~55.0.21",

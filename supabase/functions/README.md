@@ -6,6 +6,7 @@
 - `cleanup-ended-couples`: deletes interactions after the couple's 10-day retention window.
 - `delete-account`: verifies the caller, marks deletion pending and ends an active couple.
 - `account-deletion-worker`: retries queued Auth deletion requests until the user and cascading app data are removed.
+- `generate-postcard`: creates an original couple postcard through the configured OpenAI Images model.
 
 ## Required schedules
 
@@ -30,6 +31,9 @@ npx supabase functions deploy notification-worker
 npx supabase functions deploy cleanup-ended-couples
 npx supabase functions deploy delete-account
 npx supabase functions deploy account-deletion-worker
+npx supabase functions deploy generate-postcard
 ```
 
 The default Supabase runtime provides `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to deployed functions.
+
+AI postcard generation also requires `OPENAI_API_KEY`. `OPENAI_IMAGE_MODEL` is optional and defaults to `gpt-image-1`.

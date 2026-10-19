@@ -23,13 +23,29 @@ Deno.serve(async (request) => {
   const jobs = (data ?? []) as DeletionJob[];
   const results = await Promise.all(
     jobs.map(async (job) => {
-      const { error: deleteError } = await supabase.auth.admin.deleteUser(job.user_id);
-      if (!deleteError) return { userId: job.user_id, status: 'deleted' };
+      let failure: string | null = null;
+      try {
+        const { data: clips, error: clipsError } = await supabase.storage
+          .from('voice-clips')
+          .list(job.user_id, { limit: 1000 });
+        if (clipsError) throw clipsError;
+        if (clips?.length) {
+          const { error: removeError } = await supabase.storage
+            .from('voice-clips')
+            .remove(clips.map((clip) => `${job.user_id}/${clip.name}`));
+          if (removeError) throw removeError;
+        }
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(job.user_id);
+        if (deleteError) throw deleteError;
+      } catch (nextError) {
+        failure = nextError instanceof Error ? nextError.message : 'Account deletion failed';
+      }
+      if (!failure) return { userId: job.user_id, status: 'deleted' };
 
       const { error: retryError } = await supabase.rpc('fail_account_deletion_request', {
         p_user_id: job.user_id,
         p_lease_id: job.lease_id,
-        p_last_error: deleteError.message,
+        p_last_error: failure,
         p_retry_after_seconds: Math.min(3600, 60 * 2 ** job.attempt_count),
       });
       if (retryError) throw retryError;

@@ -16,6 +16,9 @@ verify_jwt = false
 [functions.delete-account]
 verify_jwt = true
 
+[functions.generate-postcard]
+verify_jwt = true
+
 [api]
 enabled = true
 # Port to use for the API URL.

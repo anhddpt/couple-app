@@ -28,7 +28,7 @@ Thư mục này chứa đặc tả sản phẩm, định hướng thiết kế v
 | Authentication | Email OTP; local có cơ chế test riêng |
 | Ngôn ngữ | Tiếng Việt, fallback tiếng Anh |
 | Chat | Không có chat hoặc message tự do |
-| Phạm vi hiện tại | Phase 1 và Phase 2 Core đã có source Android-first |
+| Phạm vi hiện tại | Phase 1, Phase 2 Core và Phase 3 đã có source Android-first |
 
 ## Quyết định còn mở
 

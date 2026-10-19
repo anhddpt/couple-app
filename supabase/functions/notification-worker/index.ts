@@ -10,7 +10,8 @@ type ActionType =
   | 'MISS_YOU'
   | 'CHEEK_POKE'
   | 'KISS'
-  | 'SLEEPY';
+  | 'SLEEPY'
+  | 'VOICE';
 type ContentMode = 'generic' | 'sender_only' | 'detailed';
 
 type Delivery = {
@@ -38,6 +39,7 @@ const detailedMessages: Record<'vi' | 'en', Record<ActionType, string>> = {
     CHEEK_POKE: '{{name}} vừa chọc má bạn',
     KISS: '{{name}} vừa hôn bạn',
     SLEEPY: '{{name}} đang buồn ngủ',
+    VOICE: '{{name}} vừa gửi một voice action',
   },
   en: {
     HEAD_PAT: '{{name}} gave you a head pat',
@@ -49,6 +51,7 @@ const detailedMessages: Record<'vi' | 'en', Record<ActionType, string>> = {
     CHEEK_POKE: '{{name}} poked your cheek',
     KISS: '{{name}} kissed you',
     SLEEPY: '{{name}} is getting sleepy',
+    VOICE: '{{name}} sent a voice action',
   },
 };
 

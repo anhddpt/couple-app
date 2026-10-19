@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js';
+import * as Crypto from 'expo-crypto';
 
 import type {
   Avatar,
@@ -6,12 +7,16 @@ import type {
   AvatarPreset,
   AvatarState,
   CoupleSummary,
+  CoupleOutfit,
+  CoupleSpace,
   Interaction,
   InteractionHistoryItem,
   Mood,
   NotificationContentMode,
   Profile,
   QuietHours,
+  PetType,
+  RoomTheme,
 } from '@/types/domain';
 
 import { requireSupabase } from './client';
@@ -144,7 +149,7 @@ export async function redeemPairingInvitation(
 
 type InteractionIntent = {
   targetType: 'partner' | 'self';
-  targetRegion: 'head' | 'cheek' | 'body' | 'self_eyes' | 'self_mouth' | 'self_heart';
+  targetRegion: 'head' | 'cheek' | 'body' | 'self_eyes' | 'self_mouth' | 'self_heart' | 'voice';
   gestureType: 'tap' | 'long_press' | 'drag_together';
   clientEventId: string;
   clientCreatedAt: string;
@@ -188,6 +193,91 @@ export async function getInteractionHistory(
   });
   if (error) throw error;
   return (data ?? []) as InteractionHistoryItem[];
+}
+
+export async function getCoupleSpace(): Promise<CoupleSpace> {
+  const { data, error } = await requireSupabase().rpc('get_couple_space');
+  if (error) throw error;
+  return unwrap<CoupleSpace>(data);
+}
+
+export async function updateCoupleSpace(params: {
+  roomTheme: RoomTheme;
+  petType: PetType;
+  petName: string;
+  coupleOutfit: CoupleOutfit;
+}) {
+  const { data, error } = await requireSupabase().rpc('update_couple_space', {
+    p_room_theme: params.roomTheme,
+    p_pet_type: params.petType,
+    p_pet_name: params.petName.trim(),
+    p_couple_outfit: params.coupleOutfit,
+  });
+  if (error) throw error;
+  return unwrap<CoupleSpace>(data);
+}
+
+export async function careForPet() {
+  const { data, error } = await requireSupabase().rpc('care_for_pet');
+  if (error) throw error;
+  return unwrap<CoupleSpace>(data);
+}
+
+export async function uploadVoiceClip(userId: string, uri: string, extension = 'm4a') {
+  const path = `${userId}/${Crypto.randomUUID()}.${extension}`;
+  const response = await fetch(uri);
+  const bytes = await response.arrayBuffer();
+  const { error } = await requireSupabase().storage.from('voice-clips').upload(path, bytes, {
+    contentType: 'audio/mp4',
+    upsert: false,
+  });
+  if (error) throw error;
+  return path;
+}
+
+export async function deleteUploadedVoiceClip(storagePath: string) {
+  const { error } = await requireSupabase().storage.from('voice-clips').remove([storagePath]);
+  if (error) throw error;
+}
+
+export async function sendVoiceAction(params: {
+  storagePath: string;
+  durationMs: number;
+  clientEventId: string;
+}) {
+  const { data, error } = await requireSupabase().rpc('send_voice_action', {
+    p_storage_path: params.storagePath,
+    p_duration_ms: params.durationMs,
+    p_client_event_id: params.clientEventId,
+    p_client_created_at: new Date().toISOString(),
+  });
+  if (error) throw error;
+  return unwrap<Interaction>(data);
+}
+
+export async function getVoiceClipUrl(interactionId: string) {
+  const { data, error } = await requireSupabase()
+    .from('voice_clips')
+    .select('storage_path')
+    .eq('interaction_id', interactionId)
+    .single();
+  if (error) throw error;
+  const { data: signed, error: signedError } = await requireSupabase()
+    .storage
+    .from('voice-clips')
+    .createSignedUrl(data.storage_path, 300);
+  if (signedError) throw signedError;
+  return signed.signedUrl;
+}
+
+export async function generatePostcard(occasion: 'anniversary' | 'miss_you' | 'date_night') {
+  const { data, error } = await requireSupabase().functions.invoke('generate-postcard', {
+    method: 'POST',
+    body: { occasion },
+  });
+  if (error) throw error;
+  if (!data?.imageBase64) throw new Error(data?.error ?? 'Image generation failed');
+  return `data:image/png;base64,${data.imageBase64}`;
 }
 
 export async function registerDevice(params: {

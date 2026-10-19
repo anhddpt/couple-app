@@ -20,7 +20,16 @@
           "defaultChannel": "couple-actions"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Cho phép Couple App ghi voice action ngắn.",
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

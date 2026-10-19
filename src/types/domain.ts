@@ -11,6 +11,7 @@ export const actionTypes = [
   'CHEEK_POKE',
   'KISS',
   'SLEEPY',
+  'VOICE',
 ] as const;
 export type ActionType = (typeof actionTypes)[number];
 
@@ -67,7 +68,7 @@ export type Interaction = {
   action_type: ActionType;
   actor_mood: Mood;
   target_type: 'partner' | 'self';
-  target_region: 'head' | 'cheek' | 'body' | 'self_eyes' | 'self_mouth' | 'self_heart';
+  target_region: 'head' | 'cheek' | 'body' | 'self_eyes' | 'self_mouth' | 'self_heart' | 'voice';
   gesture_type: 'tap' | 'long_press' | 'drag_together';
   created_at: string;
 };
@@ -81,4 +82,24 @@ export type QuietHours = {
   start: string;
   end: string;
   timezone: string;
+};
+
+export const roomThemes = ['sunset', 'night', 'garden'] as const;
+export type RoomTheme = (typeof roomThemes)[number];
+
+export const petTypes = ['cat', 'dog', 'bunny'] as const;
+export type PetType = (typeof petTypes)[number];
+
+export const coupleOutfits = ['classic', 'cozy', 'party'] as const;
+export type CoupleOutfit = (typeof coupleOutfits)[number];
+
+export type CoupleSpace = {
+  couple_id: string;
+  room_theme: RoomTheme;
+  pet_type: PetType;
+  pet_name: string;
+  pet_mood: 'happy' | 'hungry' | 'sleepy';
+  pet_xp: number;
+  couple_outfit: CoupleOutfit;
+  updated_at: string;
 };

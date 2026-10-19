@@ -13,6 +13,7 @@ export function getReactionText(action: ActionType, t: TFunction) {
     CHEEK_POKE: 'reaction.cheekPoke.default',
     KISS: 'reaction.kiss.default',
     SLEEPY: 'reaction.sleepy.default',
+    VOICE: 'reaction.voice.default',
   };
 
   return t(keyByAction[action]);

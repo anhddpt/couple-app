@@ -70,6 +70,7 @@ npx supabase functions deploy notification-worker
 npx supabase functions deploy cleanup-ended-couples
 npx supabase functions deploy delete-account
 npx supabase functions deploy account-deletion-worker
+npx supabase functions deploy generate-postcard
 ```
 
 Sau deploy, tạo Vault secrets và cài ba cron job theo `supabase/scheduler.sql.example`:

@@ -10,17 +10,22 @@ import { LoadingView } from '@/components/LoadingView';
 import { Screen } from '@/components/Screen';
 import { InteractionScene } from '@/features/interactions/InteractionScene';
 import { defaultAvatarConfigs } from '@/features/avatar/presets';
+import { roomThemeCatalog } from '@/features/space/catalog';
+import { SharedPet } from '@/features/space/SharedPet';
+import { VoicePlayback } from '@/features/voice/VoicePlayback';
+import { VoiceRecorderButton } from '@/features/voice/VoiceRecorderButton';
 import { useAuth } from '@/providers/AuthProvider';
 import { registerForPushNotifications } from '@/services/notifications';
 import {
   acknowledgeInteraction,
+  getCoupleSpace,
   peekLatestInteraction,
   sendInteraction,
   updateMood,
 } from '@/services/supabase/api';
 import { requireSupabase } from '@/services/supabase/client';
 import { colors, radius, spacing } from '@/theme';
-import type { Interaction, Mood } from '@/types/domain';
+import type { CoupleSpace, Interaction, Mood } from '@/types/domain';
 import { moods } from '@/types/domain';
 
 const moodLabels: Record<Mood, string> = {
@@ -35,6 +40,7 @@ export default function RoomScreen() {
   const [currentInteraction, setCurrentInteraction] = useState<Interaction | null>(null);
   const [loadingAction, setLoadingAction] = useState(false);
   const [error, setError] = useState('');
+  const [space, setSpace] = useState<CoupleSpace | null>(null);
   const consumeInFlight = useRef(false);
   const consumeQueued = useRef(false);
 
@@ -67,6 +73,7 @@ export default function RoomScreen() {
 
     void registerForPushNotifications().catch(() => undefined);
     void consumeLatest();
+    void getCoupleSpace().then(setSpace).catch(() => undefined);
 
     const client = requireSupabase();
     const interactionsChannel = client
@@ -97,9 +104,24 @@ export default function RoomScreen() {
       )
       .subscribe();
 
+    const spaceChannel = client
+      .channel(`couple-space:${couple.couple_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'couple_spaces',
+          filter: `couple_id=eq.${couple.couple_id}`,
+        },
+        () => void getCoupleSpace().then(setSpace),
+      )
+      .subscribe();
+
     return () => {
       void client.removeChannel(interactionsChannel);
       void client.removeChannel(moodChannel);
+      void client.removeChannel(spaceChannel);
     };
   }, [consumeLatest, couple, refresh, session]);
 
@@ -167,7 +189,7 @@ export default function RoomScreen() {
   if (!people) return <LoadingView label={t('common.loading')} />;
 
   return (
-    <Screen>
+    <Screen style={space ? { backgroundColor: roomThemeCatalog[space.room_theme].background } : undefined}>
       <View style={styles.moods}>
         <AppText variant="label">{t('room.mood')}</AppText>
         <View style={styles.moodOptions}>
@@ -219,7 +241,14 @@ export default function RoomScreen() {
         onSelfHeartPress={() =>
           sendIntent({ targetType: 'self', targetRegion: 'self_heart', gestureType: 'tap' })
         }
+        coupleOutfit={space?.couple_outfit}
       />
+
+      {space ? <SharedPet space={space} /> : null}
+
+      {currentInteraction?.action_type === 'VOICE' ? (
+        <VoicePlayback interactionId={currentInteraction.id} />
+      ) : null}
 
       {!couple.partner_available ? (
         <AppText color="textSecondary" align="center">
@@ -303,6 +332,7 @@ export default function RoomScreen() {
           }
         />
       </View>
+      <VoiceRecorderButton onSent={setCurrentInteraction} />
       {error ? <AppText color="danger">{error}</AppText> : null}
     </Screen>
   );

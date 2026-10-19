@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText } from '@/components/AppText';
 import { ChibiAvatar } from '@/features/avatar/ChibiAvatar';
 import { colors, radius, spacing } from '@/theme';
-import type { AvatarConfig, AvatarPreset, Interaction, Mood } from '@/types/domain';
+import type { AvatarConfig, AvatarPreset, CoupleOutfit, Interaction, Mood } from '@/types/domain';
 
 import { getReactionText } from './reactions';
 
@@ -28,6 +28,7 @@ type Props = {
   onSelfEyesPress?: () => void;
   onSelfMouthPress?: () => void;
   onSelfHeartPress?: () => void;
+  coupleOutfit?: CoupleOutfit;
 };
 
 export function InteractionScene({
@@ -40,6 +41,7 @@ export function InteractionScene({
   onSelfEyesPress,
   onSelfMouthPress,
   onSelfHeartPress,
+  coupleOutfit,
 }: Props) {
   const { t } = useTranslation();
   const actorMove = useSharedValue(0);
@@ -99,6 +101,7 @@ export function InteractionScene({
       onEyesPress: person.id === me.id ? onSelfEyesPress : undefined,
       onMouthPress: person.id === me.id ? onSelfMouthPress : undefined,
       onHeartPress: person.id === me.id ? onSelfHeartPress : undefined,
+      coupleOutfit,
     };
   }
 
