@@ -1,4 +1,9 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
+import {
+  listStoragePrefixPaths,
+  readAllStoragePaths,
+  removeStoragePaths,
+} from '../_shared/storage.ts';
 import { createServiceClient } from '../_shared/supabase.ts';
 
 type DeletionJob = {
@@ -25,16 +30,11 @@ Deno.serve(async (request) => {
     jobs.map(async (job) => {
       let failure: string | null = null;
       try {
-        const { data: clips, error: clipsError } = await supabase.storage
-          .from('voice-clips')
-          .list(job.user_id, { limit: 1000 });
-        if (clipsError) throw clipsError;
-        if (clips?.length) {
-          const { error: removeError } = await supabase.storage
-            .from('voice-clips')
-            .remove(clips.map((clip) => `${job.user_id}/${clip.name}`));
-          if (removeError) throw removeError;
-        }
+        const recordedPaths = await readAllStoragePaths(supabase, 'list_voice_paths_for_user', {
+          p_user_id: job.user_id,
+        });
+        const prefixPaths = await listStoragePrefixPaths(supabase, job.user_id);
+        await removeStoragePaths(supabase, [...new Set([...recordedPaths, ...prefixPaths])]);
         const { error: deleteError } = await supabase.auth.admin.deleteUser(job.user_id);
         if (deleteError) throw deleteError;
       } catch (nextError) {

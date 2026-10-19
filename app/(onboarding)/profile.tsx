@@ -7,8 +7,8 @@ import { AppButton } from '@/components/AppButton';
 import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
+import { saveProfile } from '@/features/profile/profileApi';
 import { useAuth } from '@/providers/AuthProvider';
-import { saveProfile } from '@/services/supabase/api';
 import { spacing } from '@/theme';
 
 export default function ProfileScreen() {

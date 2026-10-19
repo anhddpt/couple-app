@@ -81,6 +81,64 @@ try {
   assert(aliceCouple?.partner_name === 'Bob', 'Alice must see Bob as partner.');
   assert(bobCouple?.partner_name === 'Alice', 'Bob must see Alice as partner.');
 
+  const initialSpace = (await rpc(alice.client, 'get_couple_space'))?.[0];
+  assert(initialSpace?.pet_mood === 'happy', 'A new shared pet must start happy.');
+  const repeatedSpace = (await rpc(alice.client, 'get_couple_space'))?.[0];
+  assert(
+    repeatedSpace.updated_at === initialSpace.updated_at,
+    'Reading shared space must not write or change updated_at.',
+  );
+  const updatedSpace = (
+    await rpc(alice.client, 'update_couple_space', {
+      p_room_theme: 'garden',
+      p_pet_type: 'bunny',
+      p_pet_name: 'Mochi',
+      p_couple_outfit: 'cozy',
+      p_expected_updated_at: initialSpace.updated_at,
+    })
+  )?.[0];
+  assert(updatedSpace?.room_theme === 'garden', 'Shared space update must persist the selected theme.');
+  const staleSpaceUpdate = await bob.client.rpc('update_couple_space', {
+    p_room_theme: 'night',
+    p_pet_type: 'cat',
+    p_pet_name: 'Stale',
+    p_couple_outfit: 'party',
+    p_expected_updated_at: initialSpace.updated_at,
+  });
+  assert(staleSpaceUpdate.error, 'A stale shared-space update must be rejected.');
+
+  const arbitraryUpload = await alice.client.storage
+    .from('voice-clips')
+    .upload(`${alice.id}/${randomUUID()}.m4a`, new Uint8Array([1, 2, 3]), {
+      contentType: 'audio/mp4',
+    });
+  assert(arbitraryUpload.error, 'Voice upload without a reservation must be rejected.');
+  const reservation = (await rpc(alice.client, 'reserve_voice_upload'))?.[0];
+  assert(reservation?.storage_path, 'Voice reservation must return a storage path.');
+  const reservedUpload = await alice.client.storage
+    .from('voice-clips')
+    .upload(reservation.storage_path, new Uint8Array([1, 2, 3]), { contentType: 'audio/mp4' });
+  if (reservedUpload.error) throw reservedUpload.error;
+  const voiceInteraction = (
+    await rpc(alice.client, 'send_voice_action', {
+      p_reservation_id: reservation.reservation_id,
+      p_duration_ms: 1000,
+      p_client_event_id: randomUUID(),
+      p_client_created_at: new Date().toISOString(),
+    })
+  )?.[0];
+  assert(voiceInteraction?.action_type === 'VOICE', 'Reserved voice upload must finalize as VOICE.');
+
+  const postcardJob = await rpc(alice.client, 'claim_postcard_generation');
+  assert(postcardJob, 'Postcard generation must create a quota job.');
+  const duplicatePostcardJob = await alice.client.rpc('claim_postcard_generation');
+  assert(duplicatePostcardJob.error, 'Concurrent postcard generation must be rejected.');
+  await rpc(admin, 'complete_postcard_generation', {
+    p_job_id: postcardJob,
+    p_succeeded: false,
+    p_last_error: 'Smoke test',
+  });
+
   await rpc(bob.client, 'register_device', {
     p_expo_push_token: `ExponentPushToken[smoke-${randomUUID()}]`,
     p_device_fingerprint: randomUUID(),
@@ -140,8 +198,35 @@ try {
     .update({ purge_after: new Date(Date.now() - 1000).toISOString() })
     .eq('id', coupleId);
   if (expireError) throw expireError;
-  const deletedCount = await rpc(admin, 'cleanup_ended_couple_interactions');
+  let deletedCount;
+  if (workerSecret) {
+    const cleanupResponse = await fetch(`${url}/functions/v1/cleanup-ended-couples`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Worker-Secret': workerSecret },
+      body: '{}',
+    });
+    assert(cleanupResponse.ok, 'Ended-couple cleanup worker must remove voice objects and metadata.');
+    const cleanupResult = await cleanupResponse.json();
+    deletedCount = cleanupResult.deletedInteractions;
+  } else {
+    await admin.storage.from('voice-clips').remove([reservation.storage_path]);
+    deletedCount = await rpc(admin, 'cleanup_ended_couple_interactions');
+  }
   assert(Number(deletedCount) >= 1, 'Cleanup must delete expired couple interactions.');
+  const removedVoice = await admin.storage.from('voice-clips').download(reservation.storage_path);
+  assert(removedVoice.error, 'Ended-couple cleanup must remove the voice object.');
+
+  const deactivatedUser = await createTestUser('deactivated');
+  users.push(deactivatedUser.id);
+  const { error: deactivatedProfileError } = await deactivatedUser.client
+    .from('profiles')
+    .insert({ id: deactivatedUser.id, display_name: 'Inactive', locale: 'vi' });
+  if (deactivatedProfileError) throw deactivatedProfileError;
+  await rpc(deactivatedUser.client, 'deactivate_account');
+  const inactiveCommand = await deactivatedUser.client.rpc('set_notification_content_mode', {
+    p_content_mode: 'detailed',
+  });
+  assert(inactiveCommand.error, 'A deactivated account must not execute settings commands.');
 
   if (workerSecret) {
     const deletionUser = await createTestUser('delete');

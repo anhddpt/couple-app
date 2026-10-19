@@ -7,7 +7,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
-import { verifyOtp } from '@/services/supabase/api';
+import { verifyOtp } from '@/features/auth/authApi';
 import { spacing } from '@/theme';
 
 export default function OtpScreen() {

@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AppButton } from '@/components/AppButton';
 import { AppText } from '@/components/AppText';
+import { getInteractionHistory } from '@/features/interactions/interactionsApi';
 import { getReactionText } from '@/features/interactions/reactions';
-import { getInteractionHistory } from '@/services/supabase/api';
 import { colors, radius, spacing } from '@/theme';
 import type { InteractionHistoryItem } from '@/types/domain';
 

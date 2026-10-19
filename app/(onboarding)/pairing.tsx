@@ -8,13 +8,13 @@ import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
 import { ChibiAvatar } from '@/features/avatar/ChibiAvatar';
-import { useAuth } from '@/providers/AuthProvider';
 import {
   createPairingInvitation,
   type PairingPreview,
   previewPairingInvitation,
   redeemPairingInvitation,
-} from '@/services/supabase/api';
+} from '@/features/pairing/pairingApi';
+import { useAuth } from '@/providers/AuthProvider';
 import { colors, radius, spacing } from '@/theme';
 
 export default function PairingScreen() {

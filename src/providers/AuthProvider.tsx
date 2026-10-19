@@ -2,13 +2,8 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { env } from '@/config/env';
+import { getActiveCoupleState, getAvatar, getAvatarState, getProfile } from '@/features/profile/profileApi';
 import { unregisterCurrentPushDevice } from '@/services/notifications';
-import {
-  getActiveCoupleState,
-  getAvatar,
-  getAvatarState,
-  getProfile,
-} from '@/services/supabase/api';
 import { supabase } from '@/services/supabase/client';
 import type { Avatar, AvatarState, CoupleSummary, Profile } from '@/types/domain';
 

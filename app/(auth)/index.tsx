@@ -7,7 +7,7 @@ import { AppButton } from '@/components/AppButton';
 import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
-import { sendOtp } from '@/services/supabase/api';
+import { sendOtp } from '@/features/auth/authApi';
 import { spacing } from '@/theme';
 
 export default function AuthScreen() {

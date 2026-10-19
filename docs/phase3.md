@@ -10,11 +10,13 @@ Pet có ba loại placeholder (`cat`, `dog`, `bunny`). Chăm pet tăng XP. Mood 
 
 ## Voice action
 
-Voice action được giới hạn 10 giây. File được upload vào private Supabase Storage bucket `voice-clips`, sau đó RPC tạo interaction `VOICE` và metadata trong `voice_clips`. Chỉ sender/receiver có quyền đọc và signed URL hết hạn sau 5 phút.
+Voice action được giới hạn 10 giây. Client phải lấy reservation có thời hạn trước khi upload vào private Supabase Storage bucket `voice-clips`; RPC chỉ finalize đúng reserved path thành interaction `VOICE`. Chỉ sender/receiver có quyền đọc và signed URL hết hạn sau 5 phút. Worker hàng giờ xóa upload hết hạn chưa được finalize.
 
 ## AI postcard
 
 Edge Function `generate-postcard` xác thực user, lấy avatar config và shared-space theme rồi gọi OpenAI Images API. Client chỉ chọn occasion đã định nghĩa; không gửi tên hoặc nội dung message tự do.
+
+Quota được enforce tại database: tối đa một generation đang chạy, cooldown 60 giây và tối đa ba postcard thành công trong 24 giờ cho mỗi user.
 
 Secrets production:
 
@@ -35,4 +37,4 @@ Expo SDK 55 `expo-widgets` chỉ hỗ trợ iOS WidgetKit/Live Activities. Dự 
 
 ## Migration
 
-Phase 3 dùng `supabase/migrations/20261020090000_phase3_enums.sql` và `supabase/migrations/20261020120000_phase3.sql`. Migration chính tạo private Storage bucket cho voice clip.
+Phase 3 dùng `supabase/migrations/20261020090000_phase3_enums.sql`, `supabase/migrations/20261020120000_phase3.sql` và migration corrective `supabase/migrations/20261021120000_review_fixes.sql`. Migration corrective thêm AI quota, voice reservation, object cleanup và optimistic concurrency.

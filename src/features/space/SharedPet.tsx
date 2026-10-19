@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { AppText } from '@/components/AppText';
 import { colors, radius, spacing } from '@/theme';
@@ -10,10 +16,11 @@ import { petCatalog } from './catalog';
 
 export function SharedPet({ space }: { space: CoupleSpace }) {
   const bounce = useSharedValue(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    bounce.value = withRepeat(withTiming(-5, { duration: 850 }), -1, true);
-  }, [bounce]);
+    bounce.value = reduceMotion ? 0 : withRepeat(withTiming(-5, { duration: 850 }), -1, true);
+  }, [bounce, reduceMotion]);
 
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: bounce.value }] }));
   const pet = petCatalog[space.pet_type];

@@ -14,7 +14,7 @@
     "test:watch": "jest --watch",
     "smoke:local": "node scripts/smoke-local.mjs",
     "smoke:otp:local": "node scripts/smoke-otp-local.mjs",
-    "check:functions": "npx --yes deno check supabase/functions/notification-worker/index.ts supabase/functions/account-deletion-worker/index.ts supabase/functions/cleanup-ended-couples/index.ts supabase/functions/delete-account/index.ts supabase/functions/generate-postcard/index.ts",
+    "check:functions": "npx --yes deno check supabase/functions/notification-worker/index.ts supabase/functions/account-deletion-worker/index.ts supabase/functions/cleanup-ended-couples/index.ts supabase/functions/cleanup-voice-orphans/index.ts supabase/functions/delete-account/index.ts supabase/functions/generate-postcard/index.ts",
     "check": "npm run lint && npm run typecheck && npm test && npm run check:functions"
   },
   "dependencies": {

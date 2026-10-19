@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -7,73 +6,47 @@ import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { LoadingView } from '@/components/LoadingView';
 import { Screen } from '@/components/Screen';
+import { useAuth } from '@/providers/AuthProvider';
 import { outfitCatalog, petCatalog, roomThemeCatalog } from '@/features/space/catalog';
 import { SharedPet } from '@/features/space/SharedPet';
-import { careForPet, getCoupleSpace, updateCoupleSpace } from '@/services/supabase/api';
+import { useCoupleSpaceEditor } from '@/features/space/useCoupleSpaceEditor';
 import { colors, radius, spacing } from '@/theme';
-import type { CoupleOutfit, CoupleSpace, PetType, RoomTheme } from '@/types/domain';
 import { coupleOutfits, petTypes, roomThemes } from '@/types/domain';
 
 export default function SpaceScreen() {
   const { t } = useTranslation();
-  const [space, setSpace] = useState<CoupleSpace | null>(null);
-  const [roomTheme, setRoomTheme] = useState<RoomTheme>('sunset');
-  const [petType, setPetType] = useState<PetType>('cat');
-  const [petName, setPetName] = useState('Mochi');
-  const [outfit, setOutfit] = useState<CoupleOutfit>('classic');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    void getCoupleSpace()
-      .then((value) => {
-        setSpace(value);
-        setRoomTheme(value.room_theme);
-        setPetType(value.pet_type);
-        setPetName(value.pet_name);
-        setOutfit(value.couple_outfit);
-      })
-      .catch((nextError) => setError(nextError instanceof Error ? nextError.message : t('error.generic')))
-      .finally(() => setLoading(false));
-  }, [t]);
-
-  async function save() {
-    try {
-      setSaving(true);
-      setError('');
-      setSpace(await updateCoupleSpace({ roomTheme, petType, petName, coupleOutfit: outfit }));
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function care() {
-    try {
-      setSpace(await careForPet());
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
+  const { couple } = useAuth();
+  const {
+    space,
+    draft,
+    loading,
+    saving,
+    error,
+    hasConflict,
+    updateDraft,
+    save,
+    care,
+    reloadAfterConflict,
+  } = useCoupleSpaceEditor(couple?.couple_id ?? '', t('error.generic'));
 
   if (loading) return <LoadingView label={t('common.loading')} />;
 
   return (
     <Screen scroll>
-      {space ? <SharedPet space={{ ...space, pet_type: petType, pet_name: petName }} /> : null}
-      <AppButton label={t('space.care')} variant="secondary" onPress={care} />
+      {space ? (
+        <SharedPet space={{ ...space, pet_type: draft.petType, pet_name: draft.petName }} />
+      ) : null}
+      <AppButton label={t('space.care')} variant="secondary" disabled={hasConflict} onPress={care} />
 
       <AppText variant="heading2">{t('space.roomTheme')}</AppText>
       <View style={styles.options}>
         {roomThemes.map((theme) => (
           <Pressable
             accessibilityRole="radio"
-            accessibilityState={{ checked: roomTheme === theme }}
+            accessibilityState={{ checked: draft.roomTheme === theme }}
             key={theme}
-            onPress={() => setRoomTheme(theme)}
-            style={[styles.option, roomTheme === theme && styles.selected]}
+            onPress={() => updateDraft({ roomTheme: theme })}
+            style={[styles.option, draft.roomTheme === theme && styles.selected]}
           >
             <View style={[styles.swatch, { backgroundColor: roomThemeCatalog[theme].background }]} />
             <AppText variant="caption">{t(roomThemeCatalog[theme].labelKey)}</AppText>
@@ -86,27 +59,32 @@ export default function SpaceScreen() {
         {petTypes.map((type) => (
           <Pressable
             accessibilityRole="radio"
-            accessibilityState={{ checked: petType === type }}
+            accessibilityState={{ checked: draft.petType === type }}
             key={type}
-            onPress={() => setPetType(type)}
-            style={[styles.option, petType === type && styles.selected]}
+            onPress={() => updateDraft({ petType: type })}
+            style={[styles.option, draft.petType === type && styles.selected]}
           >
             <AppText variant="heading2">{petCatalog[type].symbol}</AppText>
             <AppText variant="caption">{t(petCatalog[type].labelKey)}</AppText>
           </Pressable>
         ))}
       </View>
-      <AppInput label={t('space.petName')} maxLength={24} value={petName} onChangeText={setPetName} />
+      <AppInput
+        label={t('space.petName')}
+        maxLength={24}
+        value={draft.petName}
+        onChangeText={(petName) => updateDraft({ petName })}
+      />
 
       <AppText variant="heading2">{t('space.coupleOutfit')}</AppText>
       <View style={styles.options}>
         {coupleOutfits.map((item) => (
           <Pressable
             accessibilityRole="radio"
-            accessibilityState={{ checked: outfit === item }}
+            accessibilityState={{ checked: draft.coupleOutfit === item }}
             key={item}
-            onPress={() => setOutfit(item)}
-            style={[styles.option, outfit === item && styles.selected]}
+            onPress={() => updateDraft({ coupleOutfit: item })}
+            style={[styles.option, draft.coupleOutfit === item && styles.selected]}
           >
             <AppText variant="heading2" style={{ color: outfitCatalog[item].color }}>
               {outfitCatalog[item].symbol}
@@ -116,7 +94,14 @@ export default function SpaceScreen() {
         ))}
       </View>
       {error ? <AppText color="danger">{error}</AppText> : null}
-      <AppButton label={t('common.save')} loading={saving} onPress={save} />
+      {hasConflict ? (
+        <AppButton
+          label={t('space.reloadConflict')}
+          variant="secondary"
+          onPress={reloadAfterConflict}
+        />
+      ) : null}
+      <AppButton label={t('common.save')} loading={saving} disabled={hasConflict} onPress={save} />
     </Screen>
   );
 }

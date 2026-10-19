@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/AppButton';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
+import { reactivateAccount } from '@/features/account/accountApi';
 import { useAuth } from '@/providers/AuthProvider';
-import { reactivateAccount } from '@/services/supabase/api';
 import { spacing } from '@/theme';
 
 export default function ReactivateScreen() {

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/AppButton';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
-import { generatePostcard } from '@/services/supabase/api';
+import { generatePostcard } from '@/features/postcards/postcardApi';
 import { colors, radius, spacing } from '@/theme';
 
 const occasions = ['anniversary', 'miss_you', 'date_night'] as const;

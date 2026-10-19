@@ -5,7 +5,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { env } from '@/config/env';
-import { deactivateDevice, registerDevice } from '@/services/supabase/api';
+import { deactivateDevice, registerDevice } from '@/features/notifications/deviceApi';
 import { colors } from '@/theme';
 
 const deviceIdKey = 'couple-app:device-id';

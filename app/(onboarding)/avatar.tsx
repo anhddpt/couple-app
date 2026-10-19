@@ -9,8 +9,8 @@ import { Screen } from '@/components/Screen';
 import { avatarCatalog } from '@/features/avatar/catalog';
 import { ChibiAvatar } from '@/features/avatar/ChibiAvatar';
 import { defaultAvatarConfigs } from '@/features/avatar/presets';
+import { saveAvatar } from '@/features/profile/profileApi';
 import { useAuth } from '@/providers/AuthProvider';
-import { saveAvatar } from '@/services/supabase/api';
 import { colors, radius, spacing } from '@/theme';
 import type { AvatarConfig } from '@/types/domain';
 

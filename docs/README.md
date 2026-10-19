@@ -13,6 +13,7 @@ Thư mục này chứa đặc tả sản phẩm, định hướng thiết kế v
 7. [Mô hình dữ liệu](data-model.md): bảng dữ liệu, quan hệ và chính sách truy cập.
 8. [Roadmap triển khai](implementation-roadmap.md): thứ tự xây dựng, acceptance criteria và điều kiện hoàn thành MVP.
 9. [Hướng dẫn phát triển](development.md): cách chạy mobile, Supabase, Edge Functions và scheduler.
+10. [Architecture guidelines](architecture-guidelines.md): ranh giới feature, pattern được dùng và abstraction cần tránh.
 
 ## Quyết định đã chốt
 

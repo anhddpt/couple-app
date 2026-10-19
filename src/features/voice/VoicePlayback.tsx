@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppButton } from '@/components/AppButton';
-import { getVoiceClipUrl } from '@/services/supabase/api';
+
+import { getVoiceClipUrl } from './voiceApi';
 
 export function VoicePlayback({ interactionId }: { interactionId: string }) {
   const { t } = useTranslation();

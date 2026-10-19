@@ -1,6 +1,4 @@
-import * as Localization from 'expo-localization';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -9,20 +7,11 @@ import { AppInput } from '@/components/AppInput';
 import { AppText } from '@/components/AppText';
 import { LoadingView } from '@/components/LoadingView';
 import { Screen } from '@/components/Screen';
+import { deactivateAccount, requestHardDelete, unmatch } from '@/features/account/accountApi';
+import { useUserSettings } from '@/features/settings/useUserSettings';
 import { useAuth } from '@/providers/AuthProvider';
-import {
-  deactivateAccount,
-  getUserSettings,
-  requestHardDelete,
-  setActionEnabled,
-  setActionPushEnabled,
-  setNotificationContentMode,
-  setNotificationPushEnabled,
-  setQuietHours,
-  unmatch,
-} from '@/services/supabase/api';
 import { colors, radius, spacing } from '@/theme';
-import type { ActionType, NotificationContentMode } from '@/types/domain';
+import type { NotificationContentMode } from '@/types/domain';
 import { actionTypes } from '@/types/domain';
 
 const contentModes: NotificationContentMode[] = ['generic', 'sender_only', 'detailed'];
@@ -35,114 +24,27 @@ const modeLabel: Record<NotificationContentMode, string> = {
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { refresh, signOut } = useAuth();
-  const [contentMode, setContentMode] = useState<NotificationContentMode>('generic');
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [quietEnabled, setQuietEnabled] = useState(false);
-  const [quietStart, setQuietStart] = useState('22:00');
-  const [quietEnd, setQuietEnd] = useState('07:00');
-  const [timezone, setTimezone] = useState(
-    Localization.getCalendars()[0]?.timeZone ?? 'Asia/Ho_Chi_Minh',
-  );
-  const [enabledActions, setEnabledActions] = useState<Record<ActionType, boolean>>(
-    Object.fromEntries(actionTypes.map((action) => [action, true])) as Record<ActionType, boolean>,
-  );
-  const [actionPushEnabled, setActionPushState] = useState<Record<ActionType, boolean>>(
-    Object.fromEntries(actionTypes.map((action) => [action, true])) as Record<ActionType, boolean>,
-  );
-  const [error, setError] = useState('');
-  const [loadingSettings, setLoadingSettings] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    void getUserSettings()
-      .then(({ notification, actions }) => {
-        if (!active) return;
-        setPushEnabled(notification.push_enabled);
-        setContentMode(notification.content_mode);
-        setQuietEnabled(notification.quiet_hours_enabled);
-        setQuietStart(notification.quiet_start.slice(0, 5));
-        setQuietEnd(notification.quiet_end.slice(0, 5));
-        setTimezone(notification.timezone);
-        setEnabledActions((current) => ({
-          ...current,
-          ...Object.fromEntries(actions.map((item) => [item.action_type, item.enabled])),
-        }));
-        setActionPushState((current) => ({
-          ...current,
-          ...Object.fromEntries(actions.map((item) => [item.action_type, item.push_enabled])),
-        }));
-      })
-      .catch((nextError) => {
-        if (active) {
-          setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-        }
-      })
-      .finally(() => {
-        if (active) setLoadingSettings(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [t]);
-
-  async function chooseMode(mode: NotificationContentMode) {
-    try {
-      setError('');
-      await setNotificationContentMode(mode);
-      setContentMode(mode);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
-
-  async function toggleAction(action: ActionType) {
-    const nextValue = !enabledActions[action];
-    try {
-      setError('');
-      await setActionEnabled(action, nextValue);
-      setEnabledActions((current) => ({ ...current, [action]: nextValue }));
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
-
-  async function toggleMasterPush() {
-    const nextValue = !pushEnabled;
-    try {
-      await setNotificationPushEnabled(nextValue);
-      setPushEnabled(nextValue);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
-
-  async function saveQuietHours() {
-    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(quietStart) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(quietEnd)) {
-      setError(t('settings.invalidTime'));
-      return;
-    }
-    try {
-      setError('');
-      await setQuietHours({
-        enabled: quietEnabled,
-        start: quietStart,
-        end: quietEnd,
-        timezone,
-      });
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
-
-  async function toggleActionPush(action: ActionType) {
-    const nextValue = !actionPushEnabled[action];
-    try {
-      await setActionPushEnabled(action, nextValue);
-      setActionPushState((current) => ({ ...current, [action]: nextValue }));
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : t('error.generic'));
-    }
-  }
+  const {
+    loading,
+    error,
+    contentMode,
+    pushEnabled,
+    quietEnabled,
+    quietStart,
+    quietEnd,
+    timezone,
+    enabledActions,
+    actionPushEnabled,
+    setQuietEnabled,
+    setQuietStart,
+    setQuietEnd,
+    setTimezone,
+    chooseMode,
+    toggleMasterPush,
+    toggleAction,
+    toggleActionPush,
+    saveQuietHours,
+  } = useUserSettings(t('error.generic'), t('settings.invalidTime'));
 
   function confirmUnmatch() {
     Alert.alert(t('settings.unmatchTitle'), t('settings.unmatchBody'), [
@@ -193,7 +95,7 @@ export default function SettingsScreen() {
     );
   }
 
-  if (loadingSettings) return <LoadingView label={t('common.loading')} />;
+  if (loading) return <LoadingView label={t('common.loading')} />;
 
   return (
     <Screen scroll>

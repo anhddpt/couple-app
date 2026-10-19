@@ -85,6 +85,7 @@ export const resources = {
         outfitClassic: 'Classic',
         outfitCozy: 'Cozy',
         outfitParty: 'Party',
+        reloadConflict: 'Load partner changes',
       },
       voice: {
         record: 'Send voice action',
@@ -242,6 +243,7 @@ export const resources = {
         outfitClassic: 'Cổ điển',
         outfitCozy: 'Ấm áp',
         outfitParty: 'Dự tiệc',
+        reloadConflict: 'Tải thay đổi mới từ partner',
       },
       voice: {
         record: 'Gửi voice action',

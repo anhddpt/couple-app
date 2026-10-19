@@ -19,6 +19,9 @@ verify_jwt = true
 [functions.generate-postcard]
 verify_jwt = true
 
+[functions.cleanup-voice-orphans]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

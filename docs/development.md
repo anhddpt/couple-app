@@ -71,15 +71,17 @@ npx supabase functions deploy cleanup-ended-couples
 npx supabase functions deploy delete-account
 npx supabase functions deploy account-deletion-worker
 npx supabase functions deploy generate-postcard
+npx supabase functions deploy cleanup-voice-orphans
 ```
 
-Sau deploy, tạo Vault secrets và cài ba cron job theo `supabase/scheduler.sql.example`:
+Sau deploy, tạo Vault secrets và cài bốn cron job theo `supabase/scheduler.sql.example`:
 
 - notification worker mỗi phút
 - account deletion worker mỗi phút
 - ended-couple cleanup mỗi ngày
+- voice orphan cleanup mỗi giờ
 
-Release không được coi là sẵn sàng nếu ba cron job chưa tồn tại.
+Release không được coi là sẵn sàng nếu bốn cron job chưa tồn tại.
 
 ## Android
 

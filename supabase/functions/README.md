@@ -7,6 +7,7 @@
 - `delete-account`: verifies the caller, marks deletion pending and ends an active couple.
 - `account-deletion-worker`: retries queued Auth deletion requests until the user and cascading app data are removed.
 - `generate-postcard`: creates an original couple postcard through the configured OpenAI Images model.
+- `cleanup-voice-orphans`: removes expired voice uploads that were never finalized into an interaction.
 
 ## Required schedules
 
@@ -15,6 +16,7 @@ After deploying to a hosted Supabase project:
 - Invoke `notification-worker` every minute with `X-Worker-Secret`.
 - Invoke `account-deletion-worker` every minute with `X-Worker-Secret`.
 - Invoke `cleanup-ended-couples` once per day with `X-Worker-Secret`.
+- Invoke `cleanup-voice-orphans` once per hour with `X-Worker-Secret`.
 
 Use Supabase Cron/`pg_net`, an external scheduler or CI automation. A template is provided in `supabase/scheduler.sql.example`. Never commit a service-role key.
 
@@ -32,6 +34,7 @@ npx supabase functions deploy cleanup-ended-couples
 npx supabase functions deploy delete-account
 npx supabase functions deploy account-deletion-worker
 npx supabase functions deploy generate-postcard
+npx supabase functions deploy cleanup-voice-orphans
 ```
 
 The default Supabase runtime provides `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` to deployed functions.
