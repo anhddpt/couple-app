@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Couple App",
+    "slug": "couple-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "coupleapp",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "com.anhddpt.coupleapp",
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "color": "#C34F62",
+          "defaultChannel": "couple-actions"
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

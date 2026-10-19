@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+.env
+.env.*
+!.env.example
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+coverage/
+supabase/.branches/
+supabase/.temp/
